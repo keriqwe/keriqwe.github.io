@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кубик для Telegram</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎲 Виртуальный кубик</h1>
+            <p class="subtitle">Бросай и получай случайное число!</p>
+        </div>
+        
+        <div class="dice-container">
+            <div id="dice" class="dice">
+                <div class="dot-center"></div>
+                <div class="dot top-left"></div>
+                <div class="dot top-right"></div>
+                <div class="dot middle-left"></div>
+                <div class="dot middle-right"></div>
+                <div class="dot bottom-left"></div>
+                <div class="dot bottom-right"></div>
+            </div>
+        </div>
+        
+        <div class="result-display">
+            <div class="current-result">
+                <span>Результат:</span>
+                <span id="result" class="result-number">-</span>
+            </div>
+        </div>
+        
+        <button id="rollButton" class="roll-button">
+            <span class="button-text">🎲 Бросить кубик</span>
+        </button>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <span>Всего бросков:</span>
+                <span id="totalRolls">0</span>
+            </div>
+            <div class="stat-item">
+                <span>Последние:</span>
+                <span id="lastRolls">-</span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Нажми кнопку или используй пробел</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
