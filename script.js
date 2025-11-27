@@ -17,8 +17,8 @@ class TelegramDice {
         this.loadFromStorage();
         this.updateDisplay();
         
-        // Убедимся, что кубик виден
-        this.ensureDiceVisible();
+        // Устанавливаем начальное значение
+        this.setDiceValue(1);
     }
     
     initTelegramApp() {
@@ -41,15 +41,6 @@ class TelegramDice {
         document.documentElement.style.setProperty('--tg-theme-button-color', themeParams.button_color || '#2481cc');
         document.documentElement.style.setProperty('--tg-theme-button-text-color', themeParams.button_text_color || '#ffffff');
         document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', themeParams.secondary_bg_color || '#f0f0f0');
-    }
-    
-    ensureDiceVisible() {
-        // Принудительно делаем кубик видимым
-        if (this.dice) {
-            this.dice.style.opacity = '1';
-            this.dice.style.visibility = 'visible';
-            this.dice.style.display = 'block';
-        }
     }
     
     initializeEventListeners() {
@@ -77,6 +68,9 @@ class TelegramDice {
         this.isRolling = true;
         this.rollButton.disabled = true;
         
+        // Скрываем точки во время анимации
+        this.dice.classList.add('hidden-dots');
+        
         // Анимация вращения
         this.dice.classList.add('rolling');
         this.resultElement.textContent = '?';
@@ -85,38 +79,55 @@ class TelegramDice {
         // Генерируем случайное число
         const result = Math.floor(Math.random() * 6) + 1;
         
-        // Задержка для анимации
+        console.log('Выпало число:', result); // Для отладки
+        
+        // Задержка для анимации - устанавливаем значение ПОСЛЕ анимации
         setTimeout(() => {
             this.showResult(result);
-            this.dice.classList.remove('rolling');
-            this.isRolling = false;
-            this.rollButton.disabled = false;
         }, 800);
     }
     
     showResult(result) {
-        // Обновляем данные
-        this.totalRolls++;
-        this.lastRolls.unshift(result);
-        if (this.lastRolls.length > 5) {
-            this.lastRolls.pop();
-        }
+        // Завершаем анимацию
+        this.dice.classList.remove('rolling');
         
-        // Обновляем отображение
-        this.resultElement.textContent = result;
-        this.resultElement.classList.add('result-pop');
+        // Убираем скрытие точек и устанавливаем новое значение
+        setTimeout(() => {
+            this.dice.classList.remove('hidden-dots');
+            this.setDiceValue(result);
+            
+            // Обновляем данные
+            this.totalRolls++;
+            this.lastRolls.unshift(result);
+            if (this.lastRolls.length > 5) {
+                this.lastRolls.pop();
+            }
+            
+            // Обновляем отображение
+            this.resultElement.textContent = result;
+            this.resultElement.classList.add('result-pop');
+            
+            // Вибрация (если поддерживается)
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+            
+            // Сохраняем в localStorage
+            this.saveToStorage();
+            this.updateDisplay();
+            
+            this.isRolling = false;
+            this.rollButton.disabled = false;
+        }, 100);
+    }
+    
+    setDiceValue(value) {
+        // Убедимся, что значение в пределах 1-6
+        const diceValue = Math.max(1, Math.min(6, value));
+        this.dice.setAttribute('data-value', diceValue.toString());
         
-        // Обновляем точки на кубике
-        this.dice.setAttribute('data-value', result.toString());
-        
-        // Вибрация (если поддерживается)
-        if (navigator.vibrate) {
-            navigator.vibrate(100);
-        }
-        
-        // Сохраняем в localStorage
-        this.saveToStorage();
-        this.updateDisplay();
+        // Лог для отладки
+        console.log('Установлено значение кубика:', diceValue);
     }
     
     updateDisplay() {
@@ -143,6 +154,11 @@ class TelegramDice {
                 const data = JSON.parse(saved);
                 this.totalRolls = data.totalRolls || 0;
                 this.lastRolls = data.lastRolls || [];
+                
+                // Восстанавливаем последний результат если есть
+                if (this.lastRolls.length > 0) {
+                    this.setDiceValue(this.lastRolls[0]);
+                }
             }
         } catch (e) {
             console.log('Ошибка загрузки:', e);
